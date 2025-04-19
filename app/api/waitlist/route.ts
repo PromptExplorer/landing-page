@@ -1,7 +1,7 @@
 import clientPromise from '@/lib/mongodb'
 import { NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
   try {
     const { email } = await req.json()
 
@@ -17,11 +17,11 @@ export async function POST(req: Request) {
     const collection = db.collection('emails')
 
     // Use a timeout promise to ensure the operation doesn't hang
-    const timeout = new Promise((_, reject) =>
+    const timeout = new Promise<Response>((_, reject) =>
       setTimeout(() => reject(new Error('Database operation timed out')), 4000)
     )
 
-    const dbOperation = async () => {
+    const dbOperation = async (): Promise<Response> => {
       // Check if email already exists
       const existingEmail = await collection.findOne({ email })
       if (existingEmail) {
