@@ -1,8 +1,5 @@
-import { MongoClient } from 'mongodb'
 import { NextResponse } from 'next/server'
-
-// Replace this with your MongoDB Atlas connection string
-const uri = process.env.MONGODB_URI || 'mongodb+srv://<username>:<password>@cluster0.mongodb.net'
+import clientPromise from '@/lib/mongodb'
 
 export async function POST(req: Request) {
   try {
@@ -15,16 +12,13 @@ export async function POST(req: Request) {
       )
     }
 
-    const client = new MongoClient(uri)
-    await client.connect()
-
+    const client = await clientPromise
     const db = client.db('waitlist')
     const collection = db.collection('emails')
 
     // Check if email already exists
     const existingEmail = await collection.findOne({ email })
     if (existingEmail) {
-      await client.close()
       return NextResponse.json(
         { message: 'Email already registered' },
         { status: 400 }
@@ -36,8 +30,6 @@ export async function POST(req: Request) {
       email,
       createdAt: new Date(),
     })
-
-    await client.close()
 
     return NextResponse.json(
       { message: 'Successfully joined waitlist' },

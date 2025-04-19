@@ -11,15 +11,22 @@ export default function Hero() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('loading')
+    setMessage('')
 
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
       const response = await fetch('/api/waitlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       })
+
+      clearTimeout(timeoutId)
 
       const data = await response.json()
 
@@ -30,9 +37,13 @@ export default function Hero() {
       } else {
         throw new Error(data.message || 'Something went wrong')
       }
-    } catch (error) {
+    } catch (error: unknown) {
       setStatus('error')
-      setMessage(error instanceof Error ? error.message : 'Failed to join waitlist')
+      if (error instanceof Error && error.name === 'AbortError') {
+        setMessage('Request timed out. Please try again.')
+      } else {
+        setMessage(error instanceof Error ? error.message : 'Failed to join waitlist')
+      }
     }
   }
 
