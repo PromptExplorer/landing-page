@@ -26,7 +26,7 @@ export async function POST(req: Request): Promise<Response> {
       setTimeout(() => {
         console.log('Operation timed out')
         reject(new Error('Database operation timed out'))
-      }, 4000)
+      }, 5000)
     )
 
     const dbOperation = async (): Promise<Response> => {

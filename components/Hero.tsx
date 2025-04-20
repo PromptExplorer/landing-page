@@ -1,111 +1,96 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import Link from 'next/link'
+
+interface BlogPost {
+  title: string
+  excerpt: string
+  date: string
+  slug: string
+  category: string
+}
+
+const featuredPosts: BlogPost[] = [
+  {
+    title: "The Rise of AI Agents in Modern Software Development",
+    excerpt: "Exploring how AI agents are revolutionizing the way we build and maintain software.",
+    date: "2024-03-20",
+    slug: "rise-of-ai-agents",
+    category: "Technology"
+  },
+  {
+    title: "Understanding Large Language Model Agents",
+    excerpt: "A deep dive into how LLMs power the next generation of AI agents.",
+    date: "2024-03-18",
+    slug: "understanding-llm-agents",
+    category: "AI Research"
+  },
+]
 
 export default function Hero() {
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setStatus('loading')
-    setMessage('')
-
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
-
-      const response = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId)
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setStatus('success')
-        setMessage('Thanks for joining our waitlist!')
-        setEmail('')
-      } else {
-        throw new Error(data.message || 'Something went wrong')
-      }
-    } catch (error: unknown) {
-      setStatus('error')
-      if (error instanceof Error && error.name === 'AbortError') {
-        setMessage('Request timed out. Please try again.')
-      } else {
-        setMessage(error instanceof Error ? error.message : 'Failed to join waitlist')
-      }
-    }
-  }
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-center px-4 max-w-2xl mx-auto"
-      >
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
-          Reclaim Your Time.
-        </h1>
-        <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-          Work With Purpose.
-        </h2>
-        <p className="text-xl md:text-2xl mb-8 text-gray-300">
-          Your intelligent scheduling companion—built to align your calendar with what truly matters.
-        </p>
-        
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your work email"
-              className="flex-grow px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-purple-500"
-              required
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="submit"
-              disabled={status === 'loading'}
-              className={`px-6 py-3 rounded-lg font-semibold ${
-                status === 'loading'
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90'
-              } text-white`}
+    <section className="relative min-h-screen py-20 flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+            AI Agent Insights
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 text-gray-300 max-w-3xl mx-auto">
+            Exploring the frontier of AI agents, autonomous systems, and the future of human-AI collaboration.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-8 mt-12">
+          {featuredPosts.map((post, index) => (
+            <motion.div
+              key={post.slug}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              className="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-colors duration-200"
             >
-              {status === 'loading' ? 'Joining...' : 'Join Waitlist'}
-            </motion.button>
-          </div>
-          {message && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className={`mt-3 ${
-                status === 'success' ? 'text-green-400' : 'text-red-400'
-              }`}
-            >
-              {message}
-            </motion.p>
-          )}
-        </form>
-        
-        <p className="text-sm text-gray-400 mt-4">
-          We'll notify you when we're ready to launch.
-        </p>
-      </motion.div>
+              <Link href={`/blog/${post.slug}`} className="block">
+                <span className="text-sm text-purple-400">{post.category}</span>
+                <h3 className="text-2xl font-bold text-white mt-2 mb-3">{post.title}</h3>
+                <p className="text-gray-300 mb-4">{post.excerpt}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-400">{formatDate(post.date)}</span>
+                  <span className="text-purple-400 hover:text-purple-300">Read more →</span>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="text-center mt-12"
+        >
+          <Link 
+            href="/blog"
+            className="inline-block px-8 py-4 rounded-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition-opacity"
+          >
+            View All Posts
+          </Link>
+        </motion.div>
+      </div>
     </section>
   )
 } 
